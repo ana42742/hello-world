@@ -1,11 +1,13 @@
 use flowsnet_platform_sdk::logger;
 use lambda_flows::{request_received, send_response};
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
 
 const VALID_USERNAME: &str = "abc";
 const VALID_PASSWORD: &str = "pass";
 
+#[derive(Debug, Deserialize)]
 struct LoginRequest {
     username: String,
     password: String,
