@@ -6,6 +6,11 @@ use std::collections::HashMap;
 const VALID_USERNAME: &str = "abc";
 const VALID_PASSWORD: &str = "pass";
 
+struct LoginRequest {
+    username: String,
+    password: String,
+}
+
 #[no_mangle]
 #[tokio::main(flavor = "current_thread")]
 pub async fn run() -> anyhow::Result<()> {
@@ -13,17 +18,30 @@ pub async fn run() -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn handler(headers: Vec<(String, String)>, qry: HashMap<String, Value>, _body: Vec<u8>) {
+async fn handler(headers: Vec<(String, String)>, qry: HashMap<String, Value>, body: Vec<u8>) {
     logger::init();
     log::info!("Headers -- {:?}", headers);
 
-    // let msg = qry.get("msg").unwrap();
-    let username = qry.get("username").and_then(|v| v.as_str());
-    let password = qry.get("password").and_then(|v| v.as_str());
+    let login_request: LoginRequest = match serde_json::from_slice(&body) {
+        Ok(login_request) => login_request,
+        Err(_) => {
+            // Respond with a failure message if the request body is not a valid JSON or cannot be deserialized
+            let resp = "Invalid JSON request body";
+            send_response(
+                400, // Bad Request status code
+                vec![(String::from("content-type"), String::from("text/html"))],
+                resp.as_bytes().to_vec(),
+            );
+            return;
+        }
+    };
 
-    if let (Some(username), Some(password)) = (username, password) {
+    if let (Some(username), Some(password)) =
+        (Some(login_request.username), Some(login_request.password))
+    {
         // Validate the provided credentials against predefined credentials
         if username == VALID_USERNAME && password == VALID_PASSWORD {
+            // Login successful
             let resp = format!("Login successful for user: {}", username);
             send_response(
                 200,
@@ -32,26 +50,12 @@ async fn handler(headers: Vec<(String, String)>, qry: HashMap<String, Value>, _b
             );
             return;
         }
-    } else {
-        let missing_username = username.unwrap_or_default();
-        let missing_password = password.unwrap_or_default();
-        let resp = format!(
-            "Login failed: Invalid username or password. Username: {}, Password: {}",
-            missing_username, missing_password
-        );
-        send_response(
-            401, // Unauthorized status code
-            vec![(String::from("content-type"), String::from("text/html"))],
-            resp.as_bytes().to_vec(),
-        );
     }
 
-    // let msg = String::from_utf8(body).unwrap_or("".to_string());
-    // let resp = format!("Welcome to flows.network.\nYou just said: '{}'.\nLearn more at: https://github.com/flows-network/hello-world\n", msg);
-
-    // send_response(
-    //     200,
-    //     vec![(String::from("content-type"), String::from("text/html"))],
-    //     resp.as_bytes().to_vec(),
-    // );
+    let resp = "Login failed: Invalid username or password";
+    send_response(
+        401, // Unauthorized status code
+        vec![(String::from("content-type"), String::from("text/html"))],
+        resp.as_bytes().to_vec(),
+    );
 }
