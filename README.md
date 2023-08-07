@@ -1,22 +1,25 @@
-# Getting started with a simple flow function
+# Login validation API written in Rust
 
-This flow function exposes a HTTP endpoint. You can submit any data to the endpoint via HTTP POST and the flow function will echo it back to you in the HTTP response.
+This project uses the `lambda_flows` and `flowsnet_platform_sdk` libraries to create a serverless function that handles user login requests. It validates JSON login data, compares it against predefined credentials, and responds with success or failure messages.
 
-1. Fork this repo into your own GitHub account.
-2. Go to [Flows.network](https://flows.network/flow/new) to create a new flow.
-3. Import the forked repo from your account into flows.network.
-4. Build and deploy.
-5. You will now get a URL endpoint to access the flow function. It is under the *Lambda Endpoint* section on the flows.network web site. You can test it as follows.
+If valid, it returns "Login successful for user: username," else "Login failed: Invalid username or password."
 
-The example below shows how to query a flow function we have already deployed.
-You can type the following URL into any browser's address bar:
+Here is the [Lambda endpoint](https://code.flows.network/lambda/7V25JR7yqq) for this API.
 
-```
-https://code.flows.network/lambda/j4DPFGufPr?msg=I+am+a+Rustacean
-```
+Example Usage:
 
-Or, you can use the `curl` command to access the flow function.
+Go to your Terminal, ensure that you have `curl` installed and enter the following:
 
 ```
-curl https://code.flows.network/lambda/j4DPFGufPr?msg=I+am+a+Rustacean
+curl -X POST "https://code.flows.network/lambda/7V25JR7yqq" -H "Content-Type: application/json" -d '{"username":"test_user","password":"test_pass"}'
 ```
+
+Output:
+`Login failed: Invalid username or password`
+
+```
+curl -X POST "https://code.flows.network/lambda/7V25JR7yqq" -H "Content-Type: application/json" -d '{"username":"test_user","password":"test_pass"}'
+```
+
+Output:
+`Login successful for user: abc`
