@@ -20,8 +20,8 @@ async fn handler(headers: Vec<(String, String)>, qry: HashMap<String, Value>, _b
     log::info!("Headers -- {:?}", headers);
 
     // let msg = qry.get("msg").unwrap();
-    let username = qry.get("username").unwrap();
-    let password = qry.get("password").unwrap();
+    let username = qry.get("username").and_then(|v| v.as_str());
+    let password = qry.get("password").and_then(|v| v.as_str());
 
     if let (Some(username), Some(password)) = (username, password) {
         // Validate the provided credentials against predefined credentials
@@ -36,7 +36,7 @@ async fn handler(headers: Vec<(String, String)>, qry: HashMap<String, Value>, _b
         }
     }
 
-    let resp = "Login failed: Invalid username or password";
+    let resp = format!("Login failed: Invalid username or password. Username: {}, Password: {}", (username, password));
     send_response(
         401, // Unauthorized status code
         vec![(String::from("content-type"), String::from("text/html"))],
