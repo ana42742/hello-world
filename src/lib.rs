@@ -1,7 +1,7 @@
-use lambda_flows::{request_received, send_response};
 use flowsnet_platform_sdk::logger;
-use std::collections::HashMap;
+use lambda_flows::{request_received, send_response};
 use serde_json::Value;
+use std::collections::HashMap;
 
 const VALID_USERNAME: &str = "abc";
 const VALID_PASSWORD: &str = "pass";
@@ -9,9 +9,7 @@ const VALID_PASSWORD: &str = "pass";
 #[no_mangle]
 #[tokio::main(flavor = "current_thread")]
 pub async fn run() -> anyhow::Result<()> {
-    request_received(|headers, qry, body| {
-        handler(headers, qry, body)
-    }).await;
+    request_received(|headers, qry, body| handler(headers, qry, body)).await;
     Ok(())
 }
 
@@ -34,14 +32,19 @@ async fn handler(headers: Vec<(String, String)>, qry: HashMap<String, Value>, _b
             );
             return;
         }
+    } else {
+        let missing_username = username.unwrap_or_default();
+        let missing_password = password.unwrap_or_default();
+        let resp = format!(
+            "Login failed: Invalid username or password. Username: {}, Password: {}",
+            missing_username, missing_password
+        );
+        send_response(
+            401, // Unauthorized status code
+            vec![(String::from("content-type"), String::from("text/html"))],
+            resp.as_bytes().to_vec(),
+        );
     }
-
-    let resp = format!("Login failed: Invalid username or password. Username: {username}, Password: {password}");
-    send_response(
-        401, // Unauthorized status code
-        vec![(String::from("content-type"), String::from("text/html"))],
-        resp.as_bytes().to_vec(),
-    );
 
     // let msg = String::from_utf8(body).unwrap_or("".to_string());
     // let resp = format!("Welcome to flows.network.\nYou just said: '{}'.\nLearn more at: https://github.com/flows-network/hello-world\n", msg);
