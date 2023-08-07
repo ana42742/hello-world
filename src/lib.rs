@@ -36,7 +36,7 @@ async fn handler(headers: Vec<(String, String)>, qry: HashMap<String, Value>, _b
         }
     }
 
-    let resp = format!("Login failed: Invalid username or password. Username: {}, Password: {}", (username, password));
+    let resp = format!("Login failed: Invalid username or password. Username: {username}, Password: {password}");
     send_response(
         401, // Unauthorized status code
         vec![(String::from("content-type"), String::from("text/html"))],
