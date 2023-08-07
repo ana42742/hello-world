@@ -20,8 +20,8 @@ async fn handler(headers: Vec<(String, String)>, qry: HashMap<String, Value>, _b
     log::info!("Headers -- {:?}", headers);
 
     // let msg = qry.get("msg").unwrap();
-    let username = qry.get("username").and_then(|v| v.as_str());
-    let password = qry.get("password").and_then(|v| v.as_str());
+    let username = qry.get("username").unwrap();
+    let password = qry.get("password").unwrap();
 
     if let (Some(username), Some(password)) = (username, password) {
         // Validate the provided credentials against predefined credentials
