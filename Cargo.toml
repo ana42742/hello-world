@@ -12,5 +12,6 @@ lambda-flows = "0.4"
 flowsnet-platform-sdk = "0.1"
 tokio_wasi = { version = "1.25.1", features = ["macros", "rt"] }
 serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
 log = "0.4"
 anyhow = "1"
